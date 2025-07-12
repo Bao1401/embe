@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>💖 Nhắc Bé Iu Kỉ Luật</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(to bottom right, #ffe0f0, #fff0f5);
+      padding: 10px;
+      overflow-x: hidden;
+      color: #cc0055;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      color: #e60073;
+      margin-top: 1em;
+    }
+    #welcomeOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 192, 203, 0.95);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: transform 1s ease-out;
+      padding: 20px;
+      text-align: center;
+    }
+    #welcomeOverlay.slide-out {
+      transform: translateY(-100%);
+    }
+    #welcomeOverlay h2 {
+      font-size: 1.5em;
+      margin-bottom: 15px;
+    }
+    #welcomeOverlay button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ff66a3;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    #taskForm {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    #taskForm input[type="text"],
+    #taskForm input[type="date"],
+    #taskForm select {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ff99c2;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ff66a3;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fff0f5;
+      border-left: 5px solid #ff66a3;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      border-radius: 15px;
+      word-wrap: break-word;
+    }
+    .reminder {
+      color: red;
+      font-weight: bold;
+    }
+    .completed {
+      color: green;
+    }
+    .submitted-image {
+      margin-top: 10px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 10px;
+      border: 2px dashed pink;
+    }
+    #scoreDisplay {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #e60073;
+    }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .countdown {
+      margin-top: 5px;
+      font-style: italic;
+      color: #cc6699;
+    }
+    @media screen and (max-width: 600px) {
+  body {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  h1, h3 {
+    font-size: 1.4em;
+    margin: 10px 0;
+  }
+
+  #taskForm input[type="text"],
+  #taskForm select,
+  #taskForm input[type="date"],
+  #eventInput,
+  #eventDateTime {
+    font-size: 16px;
+    padding: 12px;
+    width: 95%;
+    max-width: 100%;
+  }
+
+  button {
+    font-size: 16px;
+    padding: 12px 20px;
+    border-radius: 16px;
+    width: auto;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .submitted-image {
+    max-width: 100%;
+    height: auto;
+  }
+
+  ul li {
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 12px;
+  }
+
+  #welcomeOverlay h2 {
+    font-size: 20px;
+    padding: 0 10px;
+  }
+
+  #welcomeOverlay button {
+    font-size: 16px;
+    padding: 10px 18px;
+  }
+}
+
+  </style>
+  
+</head>
+<body>
+  <div id="welcomeOverlay">
+    <h2>💗 Chào mừng tình yêu quay trở lại! 💗</h2>
+    <button onclick="startApp()">Bắt đầu nào 💕</button>
+  </div>
+
+  <h1>💖 Báo cáo yêu thương 💖</h1>
+  <div id="scoreDisplay">Điểm của bé: 0</div>
+  <div id="taskForm">
+    <input type="text" id="taskInput" placeholder="💌 List to do...">
+    <select id="priorityInput">
+      <option value="Must">🔥 Must</option>
+      <option value="Need">⏰ Need</option>
+      <option value="Should">🕗 Should</option>
+    </select>
+    <input type="date" id="dueDateInput">
+    <button onclick="addTask()">Thêm 💖</button>
+  </div>
+  <ul id="taskList"></ul>
+  <hr>
+  <h3 style="text-align:center;">📅 Lịch trình yêu thương của bé</h3>
+  <div id="calendarSection" style="text-align:center; margin: 20px;">
+    <input type="text" id="eventInput" placeholder="Tên sự kiện..." style="padding: 8px; border-radius: 8px;">
+    <input type="datetime-local" id="eventDateTime" style="padding: 8px; border-radius: 8px;">
+    <button onclick="addEvent()" style="padding: 8px 15px; border-radius: 10px; background-color: hotpink; color: white;">Thêm sự kiện 💘</button>
+    <ul id="eventList" style="list-style:none; padding: 0; margin-top: 15px;"></ul>
+  </div>
+
+  <script>
+    const taskList = document.getElementById("taskList");
+    const scoreDisplay = document.getElementById("scoreDisplay");
+
+    function startApp() {
+      const welcome = document.getElementById("welcomeOverlay");
+      welcome.classList.add("slide-out");
+      setTimeout(() => welcome.style.display = "none", 1000);
+      loadTasks();
+    }
+
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      const score = parseInt(localStorage.getItem("score")) || 0;
+      scoreDisplay.textContent = `Điểm của bé: ${score}`;
+      taskList.innerHTML = "";
+
+      tasks.forEach((task, index) => {
+        const li = document.createElement("li");
+
+        const nameDiv = document.createElement("div");
+        nameDiv.innerHTML = `<span id="name-${index}">💗 ${task.name}</span><br>
+          <small>Ngày thêm: ${new Date(task.date).toLocaleString()}</small><br>
+          <strong>Độ quan trọng: ${task.priority}</strong><br>
+          <strong>Hạn chót: ${new Date(task.dueDate).toLocaleDateString()}</strong>`;
+        li.appendChild(nameDiv);
+
+        const now = new Date();
+        const dueDate = new Date(task.dueDate);
+        const overdue = now > dueDate;
+
+        if (!task.done && overdue) {
+          const reminder = document.createElement("div");
+          reminder.textContent = "🔔 Trễ hạn rồi đó bé 😢";
+          reminder.classList.add("reminder");
+          li.appendChild(reminder);
+
+          if (!task.penalized) {
+            updateScore(-5);
+            task.penalized = true;
+            saveTasks(tasks);
+          }
+        }
+
+        if (task.done) {
+          const status = document.createElement("div");
+          status.textContent = "✅ Đã done 🎉";
+          status.classList.add("completed");
+          li.appendChild(status);
+
+          if (task.imageData) {
+            const img = document.createElement("img");
+            img.src = task.imageData;
+            img.className = "submitted-image";
+            li.appendChild(img);
+          }
+        }
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*";
+
+        const submitBtn = document.createElement("button");
+        submitBtn.textContent = "💌 Nộp + Hình ảnh";
+        submitBtn.onclick = () => submitWithImage(index, fileInput);
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "✏️ Sửa";
+        editBtn.onclick = () => editTask(index);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "🗑️ Xóa";
+        deleteBtn.onclick = () => deleteTask(index);
+
+        const actionDiv = document.createElement("div");
+        actionDiv.className = "action-buttons";
+        actionDiv.appendChild(fileInput);
+        actionDiv.appendChild(submitBtn);
+        actionDiv.appendChild(editBtn);
+        actionDiv.appendChild(deleteBtn);
+
+        li.appendChild(actionDiv);
+        taskList.appendChild(li);
+      });
+    }
+
+    function addTask() {
+      const name = document.getElementById("taskInput").value.trim();
+      const priority = document.getElementById("priorityInput").value;
+      const dueDate = document.getElementById("dueDateInput").value;
+      if (!name || !dueDate) return;
+
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.push({ name, priority, dueDate, date: new Date(), done: false, penalized: false });
+      saveTasks(tasks);
+      document.getElementById("taskInput").value = "";
+      loadTasks();
+    }
+
+    function submitWithImage(index, fileInput) {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Chọn ảnh để nộp nha bé!");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+        const task = tasks[index];
+        if (!task.done) {
+          const now = new Date();
+          const due = new Date(task.dueDate);
+          if (now <= due) updateScore(3);
+          else updateScore(-5);
+        }
+        task.done = true;
+        task.imageData = e.target.result;
+        saveTasks(tasks);
+        alert("💘 Bé nộp bài giỏi quá! Hun hun hun 💋");
+        loadTasks();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateScore(change) {
+      let score = parseInt(localStorage.getItem("score")) || 0;
+      score += change;
+      localStorage.setItem("score", score);
+    }
+
+    function saveTasks(tasks) {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function deleteTask(index) {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      if (tasks[index].done) updateScore(-3);
+      tasks.splice(index, 1);
+      saveTasks(tasks);
+      loadTasks();
+    }
+
+    function editTask(index) {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      const newName = prompt("Đổi tên bài tập nha bé:", tasks[index].name);
+      if (newName && newName.trim() !== "") {
+        tasks[index].name = newName.trim();
+        saveTasks(tasks);
+        loadTasks();
+      }
+    }
+    function addEvent() {
+      const name = document.getElementById("eventInput").value.trim();
+      const datetime = document.getElementById("eventDateTime").value;  
+      if (!name || !datetime) {
+        alert("Nhập đủ tên và thời gian nha bé yêu 💕");
+        return;
+  }
+
+      const events = JSON.parse(localStorage.getItem("events") || "[]");
+      events.push({ name, datetime });
+      events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+      localStorage.setItem("events", JSON.stringify(events));
+      renderEvents();
+      document.getElementById("eventInput").value = "";
+      document.getElementById("eventDateTime").value = "";
+    }
+
+    function formatDateVietnam(dateStr) {
+      const days = ["Chủ nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+      const date = new Date(dateStr);
+      if (isNaN(date)) return "⛔ Invalid Date";
+      const dayOfWeek = days[date.getDay()];
+      return `${dayOfWeek}, ${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+    function renderEvents() {
+       const eventList = document.getElementById("eventList");
+       const events = JSON.parse(localStorage.getItem("events")) || [];
+       eventList.innerHTML = "";
+
+       const now = new Date();
+
+       events.forEach((event, index) => {
+        const li = document.createElement("li");
+        li.style.padding = "10px";
+        li.style.margin = "10px auto";
+        li.style.border = "2px solid pink";
+        li.style.borderRadius = "12px";
+        li.style.background = "#fff0f5";
+        li.style.maxWidth = "95%";
+
+        const date = new Date(event.datetime);
+        const isPast = date < now;
+
+        const dateDisplay = formatDateVietnam(event.datetime);
+        const status = isPast ? "✅ Đã qua" : "⏰ Sắp tới";
+
+        li.innerHTML = `📌 <strong>${event.name}</strong> - <span style="color:#cc0055">${dateDisplay}</span> ${status}`;
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "🔧 Sửa";
+        editBtn.style.marginLeft = "10px";
+        editBtn.style.padding = "5px 10px";
+        editBtn.style.borderRadius = "10px";
+        editBtn.style.backgroundColor = "hotpink";
+        editBtn.style.color = "white";
+        editBtn.onclick = () => editEvent(index);
+
+        li.appendChild(editBtn);
+        eventList.appendChild(li);
+  });
+}
+    function editEvent(index) {
+    const events = JSON.parse(localStorage.getItem("events")) || [];
+    const current = events[index];
+
+    const newName = prompt("💬 Nhập tên mới cho sự kiện:", current.name);
+    if (newName === null || newName.trim() === "") return;
+
+    const newDateStr = prompt("📅 Nhập ngày mới (định dạng yyyy-mm-dd):", current.datetime.split("T")[0]);
+    if (!newDateStr || !/^\d{4}-\d{2}-\d{2}$/.test(newDateStr)) {
+      alert("❌ Ngày không hợp lệ. Hãy nhập theo định dạng yyyy-mm-dd.");
+      return;
+    }
+
+    const newDate = new Date(newDateStr);
+    if (isNaN(newDate.getTime())) {
+      alert("❌ Ngày không hợp lệ.");
+      return;
+    }
+
+    // Cập nhật lại sự kiện
+    events[index].name = newName.trim();
+    events[index].datetime = newDate.toISOString();
+
+    localStorage.setItem("events", JSON.stringify(events));
+    renderEvents();
+  }
+ 
+// Gọi hàm khi load trang
+window.addEventListener("load", renderEvents);
+
+  </script>
+</body>
+</html>
+
